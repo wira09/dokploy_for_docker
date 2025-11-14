@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  dokploy:
+    image: dokploy/dokploy:latest
+    container_name: dokploy
+    restart: always
+    ports:
+      - "3000:3000"
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dokploy-data:/data
+      - dokploy-config:/app/config
+      - dokploy-logs:/app/logs
+    environment:
+      - DATABASE_URL=postgresql://dokploy:verystrongpassword@postgres:5432/dokploy
+      - DOCKPLOY_HOST=http://localhost:3000
+      - DOCKPLOY_PORT=3000
+      - DOCKPLOY_DATABASE_URL=postgresql://dokploy:verystrongpassword@postgres:5432/dokploy
+      - DOCKPLOY_SERVER_URL=http://localhost:3000
+      - DOCKPLOY_ENABLE_TELEMETRY=false
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dokploy-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=dokploy
+      - POSTGRES_USER=dokploy
+      - POSTGRES_PASSWORD=verystrongpassword
+    volumes:
+      - dokploy-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  dokploy-data:
+  dokploy-config:
+  dokploy-logs:
+  dokploy-postgres-data:
